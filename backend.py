@@ -104,9 +104,9 @@ class Session:
     def listAvailableSpells(self):
         # returns list of approved spells that suit user rank
         return self.con.execute("""SELECT id, name, description FROM spells
-                           WHERE isApproved AND
-                               requiredRankId <= (SELECT rankId FROM wizards WHERE id = ?)
-                           ORDER BY name""", (self.user_id, ))
+                           WHERE (isApproved AND
+                               requiredRankId <= (SELECT rankId FROM wizards WHERE id = ?)) OR ownerWizardId = ?
+                           ORDER BY name""", (self.user_id,self.user_id ))
 
     def searchAvailableSpells(self, pattern):
         # TODO
@@ -131,16 +131,28 @@ class Session:
         self.con.execute("UPDATE wizards SET rankId = ? WHERE id = ?", (rank_id, wizard_id))
         self.con.commit()
 
+    # def getRentedSpells(self):
+    #     with closing(self.con.cursor()) as cursor:
+    #         cursor.execute("""
+    #         SELECT spells.name,  FROM wizards
+    #         LEFT JOIN ranks ON wizards.rankId=ranks.id
+    #         WHERE wizards.id = ?
+    #         """, (self.user_id,))
+    #         cursor = self.con.cursor()
+    #         cursor.execute("SELECT * FROM spells WHERE requiredRankId <= rankID")
+    #         return cursor.fetchall
+
     def getRentedSpells(self):
         with closing(self.con.cursor()) as cursor:
             cursor.execute("""
-            SELECT spells.name,  FROM wizards
-            LEFT JOIN ranks ON wizards.rankId=ranks.id
-            WHERE wizards.id = ?
+            SELECT spells.name, rentals.startTimestamp, rentals.endTimestamp
+            FROM rentals
+            JOIN spells ON rentals.spellId = spells.id
+            WHERE rentals.wizardId = ?
+            ORDER BY rentals.startTimestamp
             """, (self.user_id,))
-            cursor = self.con.cursor()
-            cursor.execute("SELECT * FROM spells WHERE requiredRankId <= rankID")
-            return cursor.fetchall
+            return cursor.fetchall()
+
 
     def getOwnedSpells(self):
         # TODO
@@ -161,10 +173,19 @@ class Session:
         self.con.execute("DELETE FROM rentals WHERE spellId = ? AND wizardId = ?", (spellId, self.user_id))
         self.con.commit()
 
-    def updateSpell(self, id, name, description, requiredRankId, consumedMana, rentalTerms):
-        # TODO
-        pass
-    
+    # def updateSpell(self, id, name, description, requiredRankId, consumedMana, rentalTerms):
+    #     # TODO
+    #     pass
+    def updateSpell(self, spellId, name, description, requiredRankId, consumedMana, rentalTerms):
+        with closing(self.con.cursor()) as cursor:
+            cursor.execute("""
+        UPDATE spells
+        SET name = ?, description = ?, requiredRankId = ?, consumedMana = ?
+        WHERE id = ?
+        """, (name, description, requiredRankId, consumedMana, spellId))
+            self.con.commit()
+
+
     def rentSpell(self, spellId, days):
         self.con.execute("""
         INSERT INTO rentals(wizardId, spellId, startTimestamp, endTimestamp)
