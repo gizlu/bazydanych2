@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import datetime
+
 import questionary
 from questionary import Choice
 
@@ -55,9 +57,41 @@ def shorten(text, limit=80):
     else:
         return text
 
+# def editSpell(spellId):
+#     #TODO
+#     return
+
 def editSpell(spellId):
-    #TODO
-    return
+    # Pobieramy dane zaklęcia
+    spell_data = session.getSpellData(spellId)
+    if not spell_data:
+        print("Nie znaleziono zaklęcia.")
+        return
+
+    spell_name, description, required_rank_name, required_rank_id, mana_consumption, owner_name, is_approved, is_rented, is_owner = spell_data
+
+    print(f"Edytujesz zaklęcie: {spell_name}")
+    print(f"Opis: {description}")
+    print(f"Wymagana ranga: {required_rank_name}")
+    print(f"Zużycie many: {mana_consumption}")
+
+    new_name = questionary.text("Nowa nazwa zaklęcia (pozostaw puste, aby nie zmieniać):", default=spell_name).ask()
+    new_description = questionary.text("Nowy opis zaklęcia (pozostaw puste, aby nie zmieniać):", default=description).ask()
+    new_mana = questionary.text("Nowe zużycie many (pozostaw puste, aby nie zmieniać):", default=str(mana_consumption)).ask()
+
+    ranks = session.listRanks()
+    new_rank_name = questionary.select(
+        "Nowa wymagana ranga (pozostaw pustą, aby nie zmieniać):",
+        choices=[Choice(rank_name, rank_id) for rank_name, rank_id in ranks.items()] + [Choice("Brak zmiany", None)]
+    ).ask()
+
+    new_rank_id = new_rank_name if new_rank_name != "Brak zmiany" else required_rank_id
+    new_mana = int(new_mana) if new_mana else mana_consumption
+
+    session.updateSpell(spellId, new_name, new_description, new_rank_id, new_mana, None)  # rentalTerms pominięte
+
+    print("Zaklęcie zostało zaktualizowane.")
+
 
 def rentSpell(spellId):
     session.rentSpell(spellId, questionary.text("Czas wypożyczenia (dni)").ask())
@@ -117,9 +151,26 @@ def browseSpellsToApprove():
 def browseAllSpells():
     browseSpells(session.listAllSpells())
 
+# def displayRentals():
+#
+#     # TODO
+#     return
 def displayRentals():
-    # TODO
-    return
+    rented_spells = session.getRentedSpells()
+
+    if rented_spells:
+        print("Wypożyczone zaklęcia:")
+        for spell_name, start_timestamp, end_timestamp in rented_spells:
+
+            start_date = datetime.datetime.fromtimestamp(start_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+            end_date = datetime.datetime.fromtimestamp(end_timestamp).strftime("%Y-%m-%d %H:%M:%S")
+
+            print(f"Zaklęcie: {spell_name}")
+            print(f"Data wypożyczenia: {start_date}")
+            print(f"Data zwrotu: {end_date}")
+            print("-" * 30)
+    else:
+        print("Nie wypożyczyłeś żadnych zaklęć.")
 
 def make_main_menu():
     choices=[
@@ -148,9 +199,12 @@ session = questionary.select(
     questionary.text("Nazwa użytkownika").ask(),
     questionary.password("Hasło").ask()
 )
+try:
+    printSummary()
 
-printSummary()
-
-main_menu = make_main_menu()
-while(True):
-    main_menu.ask()()
+    main_menu = make_main_menu()
+    while(True):
+        main_menu.ask()()
+except Exception as e:
+    print(e)
+    a= input()
