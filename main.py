@@ -57,10 +57,6 @@ def shorten(text, limit=80):
     else:
         return text
 
-# def editSpell(spellId):
-#     #TODO
-#     return
-
 def editSpell(spellId):
     # Pobieramy dane zaklęcia
     spell_data = session.getSpellData(spellId)
@@ -151,10 +147,6 @@ def browseSpellsToApprove():
 def browseAllSpells():
     browseSpells(session.listAllSpells())
 
-# def displayRentals():
-#
-#     # TODO
-#     return
 def displayRentals():
     rented_spells = session.getRentedSpells()
 

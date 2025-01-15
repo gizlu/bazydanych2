@@ -104,8 +104,8 @@ class Session:
     def listAvailableSpells(self):
         # returns list of approved spells that suit user rank
         return self.con.execute("""SELECT id, name, description FROM spells
-                           WHERE (isApproved AND
-                               requiredRankId <= (SELECT rankId FROM wizards WHERE id = ?)) OR ownerWizardId = ?
+                           WHERE
+                           (isApproved AND requiredRankId <= (SELECT rankId FROM wizards WHERE id = ?)) OR ownerWizardId = ?
                            ORDER BY name""", (self.user_id,self.user_id ))
 
     def searchAvailableSpells(self, pattern):
@@ -131,17 +131,6 @@ class Session:
         self.con.execute("UPDATE wizards SET rankId = ? WHERE id = ?", (rank_id, wizard_id))
         self.con.commit()
 
-    # def getRentedSpells(self):
-    #     with closing(self.con.cursor()) as cursor:
-    #         cursor.execute("""
-    #         SELECT spells.name,  FROM wizards
-    #         LEFT JOIN ranks ON wizards.rankId=ranks.id
-    #         WHERE wizards.id = ?
-    #         """, (self.user_id,))
-    #         cursor = self.con.cursor()
-    #         cursor.execute("SELECT * FROM spells WHERE requiredRankId <= rankID")
-    #         return cursor.fetchall
-
     def getRentedSpells(self):
         with closing(self.con.cursor()) as cursor:
             cursor.execute("""
@@ -152,11 +141,6 @@ class Session:
             ORDER BY rentals.startTimestamp
             """, (self.user_id,))
             return cursor.fetchall()
-
-
-    def getOwnedSpells(self):
-        # TODO
-        return self.con.execute("SELECT * FROM spells WHERE requiredRankId <= rankID").fetchall()
 
     def approveSpell(self, spellId):
         self.con.execute("UPDATE spells SET isApproved = 1 WHERE id = ?", (spellId,))
@@ -173,9 +157,6 @@ class Session:
         self.con.execute("DELETE FROM rentals WHERE spellId = ? AND wizardId = ?", (spellId, self.user_id))
         self.con.commit()
 
-    # def updateSpell(self, id, name, description, requiredRankId, consumedMana, rentalTerms):
-    #     # TODO
-    #     pass
     def updateSpell(self, spellId, name, description, requiredRankId, consumedMana, rentalTerms):
         with closing(self.con.cursor()) as cursor:
             cursor.execute("""
