@@ -64,7 +64,7 @@ sarumun.addSpell(
 	"lodowy podmuch dpy",
 	"""Proste zaklęcie atakujące, będące w stanie zabić jedną osobę
 	Nie da się go zablokować toporem""",
-	sarumun.listRanks()["Adept"],
+	sarumun.listRanks()["Czeladnik"],
 	5,
 )
 
@@ -83,5 +83,26 @@ tris.addSpell(
 Ponieważ nigdy nie udało się tego zaklęcia powtórzyć, nie może być ono oficjalnie zarejestrowane.""",
 	tris.listRanks()["Arcymag"],
 	200,
+)
+
+sarumun.addSpell(
+	"lodowy pocisk",
+	"""Proste zaklęcie potrafiące zgasić ogień.""",
+	sarumun.listRanks()["Czeladnik"],
+	5,
+)
+
+alzur.addSpell(
+	"Przykładowe zaklęcie 1",
+	"""Przykładowe zaklęcie 1""",
+	sarumun.listRanks()["Czeladnik"],
+	10,
+)
+
+sarumun.addSpell(
+	"Przykładowe zaklęcie 2",
+	"""Przykładowe zaklęcie 2""",
+	sarumun.listRanks()["Czeladnik"],
+	10,
 )
 '
