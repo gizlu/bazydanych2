@@ -3,7 +3,7 @@ import hashlib
 import os
 from contextlib import closing
 
-DB_PATH = "czarodzieje.sqlite"
+DB_PATH = "spell_rental.sqlite"
 SALT_BITS = 32
 HASH_BITS = 128
 

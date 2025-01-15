@@ -1,5 +1,5 @@
 #!/bin/sh
-sqlite3 czarodzieje.sqlite <<'EOF'
+sqlite3 spell_rental.sqlite <<'EOF'
 BEGIN TRANSACTION;
 CREATE TABLE IF NOT EXISTS "spells" (
 	"id" INTEGER,
@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS "spells" (
 	"requiredRankId" INTEGER,
 	"consumedMana" INTEGER,
   "ownerWizardId" INTEGER,
-  "isApproved" INTEGER DEFAULT 0, -- oznaczane przez kusztosza
+  "isApproved" INTEGER DEFAULT 0, -- set to 1 by curator
 	PRIMARY KEY("id")
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "rentals" (
 	"id" INTEGER PRIMARY KEY,
 	"wizardId" INTEGER,
 	"spellId" INTEGER,
-	"startTimestamp" INTEGER, /* TODO: wybrać jak trzymamy datę. Unix timestamp chyba może być */
+	"startTimestamp" INTEGER, /* unix timestamp */
 	"endTimestamp" INTEGER,
   FOREIGN KEY("wizardId") REFERENCES "wizards"("id"),
   FOREIGN KEY("spellId") REFERENCES "spells"("id")
@@ -57,7 +57,7 @@ backend.register(input("nazwa użytkownika: "), getpass.getpass("hasło: "), isC
 
 
 
-# dodajemy kilka przykładowych czarodzieji
+# Add few sample wizards
 sarumun = backend.register("Sarumun", b"apud12")
 sarumun.addSpell(
 	"lodowy podmuch dpy",
@@ -84,7 +84,3 @@ Ponieważ nigdy nie udało się tego zaklęcia powtórzyć, nie może być ono o
 	200,
 )
 '
-
-
-
-# apud12
