@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS "rentals" (
   FOREIGN KEY("wizardId") REFERENCES "wizards"("id"),
   FOREIGN KEY("spellId") REFERENCES "spells"("id")
 );
+CREATE INDEX IF NOT EXISTS spells_index ON spells(name, isApproved, requiredRankId, ownerWizardId); -- for spells listing and search
 COMMIT TRANSACTION;
 EOF
 
