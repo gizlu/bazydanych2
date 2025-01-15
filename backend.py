@@ -109,11 +109,11 @@ class Session:
                            ORDER BY name""", (self.user_id,self.user_id ))
 
     def searchAvailableSpells(self, pattern):
-        # TODO
         return self.con.execute("""SELECT id, name, description FROM spells
-                           WHERE isApproved AND
-                               requiredRankId <= (SELECT rankId FROM wizards WHERE id = ?)
-                           ORDER BY name""")
+                           WHERE
+                           ((isApproved AND requiredRankId <= (SELECT rankId FROM wizards WHERE id = ?)) OR ownerWizardId = ?)
+                           AND (name LIKE '%' || ? || '%' OR description LIKE '%' || ? || '%')
+                           ORDER BY name""", (self.user_id,self.user_id, pattern, pattern))
 
     def listSpellsToApprove(self):
         return self.con.execute(
