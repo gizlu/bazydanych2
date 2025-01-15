@@ -90,7 +90,8 @@ def editSpell(spellId):
 
 
 def rentSpell(spellId):
-    session.rentSpell(spellId, questionary.text("Czas wypożyczenia (dni)").ask())
+    rentalsWithinLimit = session.rentSpell(spellId, questionary.text("Czas wypożyczenia (dni)").ask())
+    if(not rentalsWithinLimit): print("Nie można wypożyczyć zaklęcia - wyczerpano limit wypożyczeń.")
 
 def browseSpells(spells):
     spellId = questionary.select(

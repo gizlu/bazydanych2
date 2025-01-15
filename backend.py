@@ -168,12 +168,24 @@ class Session:
 
 
     def rentSpell(self, spellId, days):
+        result = self.con.execute("""
+            SELECT COUNT(rentals.id)<ranks.rentalLimit FROM wizards
+            LEFT JOIN ranks ON wizards.rankId=ranks.id
+            LEFT JOIN rentals ON wizards.id=rentals.wizardId
+            GROUP BY wizards.id
+            HAVING wizards.id = ?
+            """, (self.user_id,)).fetchone()
+        assert(result is not None)
+        rentalsWithinLimit = result[0]
+        if(not rentalsWithinLimit): return False
+
         self.con.execute("""
         INSERT INTO rentals(wizardId, spellId, startTimestamp, endTimestamp)
         VALUES(?,?,unixepoch(), unixepoch('now',format('+%d day', ?)))
         """, (self.user_id, spellId, days)
         )
         self.con.commit()
+        return True
     
     def addSpell(self, name, desc, requiredRankId, consumedMana):
         self.con.execute("""
